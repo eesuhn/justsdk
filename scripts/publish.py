@@ -198,6 +198,7 @@ def main():
 
     if not args.dry_run:
         update_version_in_file(INIT_FILE, current_version, new_version)
+        update_version_in_file(PYPROJECT_FILE, current_version, new_version)
 
     if not args.no_git:
         git_operations(new_version, args.dry_run, args.force, args.skip_clean_check)
