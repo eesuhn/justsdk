@@ -102,7 +102,6 @@ def git_operations(
         print(f"🏃 [DRY RUN] Would create git tag: v{version}")
         return
 
-    run_command(["uv", "lock"])
     run_command(["uv", "run", "ruff", "format"])
 
     if not force and not skip_clean_check:
@@ -232,6 +231,7 @@ def main():
     if not args.dry_run:
         update_version_in_file(INIT_FILE, current_version, new_version)
         update_version_in_file(PYPROJECT_FILE, current_version, new_version)
+        run_command(["uv", "lock"])
 
     if not args.no_git:
         git_operations(new_version, args.dry_run, args.force, args.skip_clean_check)
