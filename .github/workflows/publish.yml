@@ -51,6 +51,18 @@ jobs:
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
 
+      - name: Commit any pending changes
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          # Check if there are any changes
+          if ! git diff --quiet || ! git diff --staged --quiet; then
+            echo "📝 Committing pending changes before version bump..."
+            git add .
+            git commit -m "chore: prepare for version bump" || echo "No changes to commit"
+          else
+            echo "✅ Working directory is clean"
+          fi
+
       - name: Bump version and publish (Manual)
         if: github.event_name == 'workflow_dispatch'
         env:
@@ -58,6 +70,7 @@ jobs:
           TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
         run: |
           python scripts/publish.py ${{ github.event.inputs.bump_type }} \
+            --skip-clean-check \
             ${{ github.event.inputs.test_pypi == 'true' && '--test-pypi' || '' }}
 
       - name: Extract version from tag

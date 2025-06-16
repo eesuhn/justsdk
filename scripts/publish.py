@@ -82,21 +82,46 @@ def run_command(cmd: list[str], check: bool = True) -> subprocess.CompletedProce
     return result
 
 
-def git_operations(version: str, dry_run: bool = False) -> None:
+def git_operations(
+    version: str,
+    dry_run: bool = False,
+    force: bool = False,
+    skip_clean_check: bool = False,
+) -> None:
     if dry_run:
         print(f"🏃 [DRY RUN] Would create git tag: v{version}")
         return
 
-    result = run_command(["git", "status", "--porcelain"])
-    if result.stdout.strip():
-        print("❌ Git repository has uncommitted changes")
-        print("Please commit or stash changes before publishing")
-        sys.exit(1)
+    if not force and not skip_clean_check:
+        result = run_command(["git", "status", "--porcelain"])
+        if result.stdout.strip():
+            print("❌ Git repository has uncommitted changes")
+            print("Please commit or stash changes before publishing")
+            print("Or use --force to commit changes automatically")
+            sys.exit(1)
+    elif force and not skip_clean_check:
+        result = run_command(["git", "status", "--porcelain"])
+        uncommitted_files = [
+            line[3:] for line in result.stdout.strip().split("\n") if line.strip()
+        ]
+        other_files = [
+            f
+            for f in uncommitted_files
+            if not any(f.endswith(p.name) for p in [INIT_FILE, PYPROJECT_FILE])
+        ]
 
-    run_command(["git", "add", str(INIT_FILE), str(PYPROJECT_FILE)])
+        if other_files:
+            print("📝 Auto-committing pending changes...")
+            for file in other_files:
+                run_command(["git", "add", file])
+            run_command(["git", "commit", "-m", "chore: prepare for version bump"])
+
+    run_command(["git", "add", str(INIT_FILE)])
+
+    if PYPROJECT_FILE.exists():
+        run_command(["git", "add", str(PYPROJECT_FILE)])
 
     run_command(["git", "commit", "-m", f"bump: version {version}"])
-
     run_command(["git", "tag", f"v{version}"])
     run_command(["git", "push"])
     run_command(["git", "push", "--tags"])
@@ -148,6 +173,16 @@ def main():
     parser.add_argument(
         "--no-git", action="store_true", help="Skip git operations (tag and push)"
     )
+    parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Auto-commit any pending changes before version bump",
+    )
+    parser.add_argument(
+        "--skip-clean-check",
+        action="store_true",
+        help="Skip git clean check (useful for CI environments)",
+    )
 
     args = parser.parse_args()
 
@@ -165,7 +200,7 @@ def main():
         update_version_in_file(INIT_FILE, current_version, new_version)
 
     if not args.no_git:
-        git_operations(new_version, args.dry_run)
+        git_operations(new_version, args.dry_run, args.force, args.skip_clean_check)
 
     build_and_publish(args.dry_run, args.test_pypi)
 
