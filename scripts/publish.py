@@ -69,9 +69,19 @@ def update_version_in_file(file_path: Path, old_version: str, new_version: str) 
     print(f"✅ Updated {file_path.name}: {old_version} -> {new_version}")
 
 
-def run_command(cmd: list[str], check: bool = True) -> subprocess.CompletedProcess:
+def run_command(
+    cmd: list[str], check: bool = True, env: dict = None
+) -> subprocess.CompletedProcess:
     print(f"🔧 Running: {' '.join(cmd)}")
-    result = subprocess.run(cmd, capture_output=True, text=True, check=False)
+    import os
+
+    final_env = os.environ.copy()
+    if env:
+        final_env.update(env)
+
+    result = subprocess.run(
+        cmd, capture_output=True, text=True, check=False, env=final_env
+    )
 
     if result.returncode != 0 and check:
         print(f"❌ Command failed: {' '.join(cmd)}")
@@ -91,6 +101,9 @@ def git_operations(
     if dry_run:
         print(f"🏃 [DRY RUN] Would create git tag: v{version}")
         return
+
+    run_command(["uv", "lock"])
+    run_command(["uv", "run", "ruff", "format"])
 
     if not force and not skip_clean_check:
         result = run_command(["git", "status", "--porcelain"])
@@ -141,16 +154,36 @@ def build_and_publish(dry_run: bool = False, test_pypi: bool = False) -> None:
 
     run_command(["uv", "build"])
 
+    publish_cmd = ["uv", "publish"]
+
     if test_pypi:
+        publish_cmd.extend(["--publish-url", "https://test.pypi.org/legacy/"])
         print("📦 Publishing to TestPyPI...")
-        run_command(["uv", "publish", "--publish-url", "https://test.pypi.org/legacy/"])
+    else:
+        print("📦 Publishing to PyPI...")
+
+    import os
+
+    publish_env = {}
+
+    username = os.getenv("TWINE_USERNAME")
+    password = os.getenv("TWINE_PASSWORD")
+
+    if username and password:
+        publish_cmd.extend(["--username", username, "--password", password])
+        print("🔑 Using provided credentials")
+        publish_env = {"TWINE_USERNAME": username, "TWINE_PASSWORD": password}
+    else:
+        print("🔓 No credentials provided, attempting trusted publishing")
+
+    run_command(publish_cmd, env=publish_env)
+
+    if test_pypi:
         print("✅ Published to TestPyPI")
         print(
             "🧪 Test installation: pip install --index-url https://test.pypi.org/simple/ justsdk"
         )
     else:
-        print("📦 Publishing to PyPI...")
-        run_command(["uv", "publish"])
         print("✅ Published to PyPI")
         print("🎉 Installation: pip install justsdk")
 
