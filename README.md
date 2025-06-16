@@ -1,4 +1,4 @@
-![PyPI](https://img.shields.io/pypi/v/justsdk)
+[![PyPI](https://img.shields.io/pypi/v/justsdk)](https://pypi.org/project/justsdk/)
 
 # 🌊 justsdk
 
