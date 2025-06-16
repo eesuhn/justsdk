@@ -14,6 +14,7 @@ VersionType = Literal["patch", "minor", "major"]
 ROOT_DIR = Path(__file__).parent.parent
 INIT_FILE = ROOT_DIR / "src" / "justsdk" / "__init__.py"
 PYPROJECT_FILE = ROOT_DIR / "pyproject.toml"
+LOCK_FILE = ROOT_DIR / "uv.lock"
 
 
 def get_current_version() -> str:
@@ -92,6 +93,20 @@ def run_command(
     return result
 
 
+def update_lock_file(dry_run: bool = False) -> None:
+    if dry_run:
+        print("🏃 [DRY RUN] Would update uv.lock file")
+        return
+
+    print("🔒 Updating uv.lock file...")
+    run_command(["uv", "lock", "--upgrade-package", "justsdk"])
+
+    if LOCK_FILE.exists():
+        print("✅ Lock file updated successfully")
+    else:
+        print("⚠️ Warning: Lock file not found after update")
+
+
 def git_operations(
     version: str,
     dry_run: bool = False,
@@ -119,7 +134,9 @@ def git_operations(
         other_files = [
             f
             for f in uncommitted_files
-            if not any(f.endswith(p.name) for p in [INIT_FILE, PYPROJECT_FILE])
+            if not any(
+                f.endswith(p.name) for p in [INIT_FILE, PYPROJECT_FILE, LOCK_FILE]
+            )
         ]
 
         if other_files:
@@ -133,6 +150,10 @@ def git_operations(
     if PYPROJECT_FILE.exists():
         run_command(["git", "add", str(PYPROJECT_FILE)])
 
+    if LOCK_FILE.exists():
+        run_command(["git", "add", str(LOCK_FILE)])
+        print("✅ Staged uv.lock file")
+
     run_command(["git", "commit", "-m", f"bump: version {version}"])
     run_command(["git", "tag", f"v{version}"])
     run_command(["git", "push"])
@@ -142,7 +163,6 @@ def git_operations(
 
 
 def build_and_publish(dry_run: bool = False, test_pypi: bool = False) -> None:
-    """Build and publish the package"""
     if dry_run:
         print("🏃 [DRY RUN] Would build and publish package")
         return
@@ -231,7 +251,7 @@ def main():
     if not args.dry_run:
         update_version_in_file(INIT_FILE, current_version, new_version)
         update_version_in_file(PYPROJECT_FILE, current_version, new_version)
-        run_command(["uv", "lock"])
+        update_lock_file(args.dry_run)
 
     if not args.no_git:
         git_operations(new_version, args.dry_run, args.force, args.skip_clean_check)
