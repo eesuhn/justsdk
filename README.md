@@ -2,6 +2,8 @@
 
 # 🌊 justsdk
 
+<img src="https://raw.githubusercontent.com/eesuhn/justsdk/refs/heads/main/docs/banner.png" alt="banner" width="440" />
+
 Just a lightweight development kit.
 
 ## Installation
