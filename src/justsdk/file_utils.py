@@ -46,18 +46,20 @@ def write_file(
     return True
 
 
-def print_file(
+def print_data(
     data: Optional[dict],
-    file_type: str = "json",
+    data_type: str = "json",
     indent: int = 2,
     sort_keys: bool = False,
 ) -> None:
     """Pretty-print data in JSON or YAML format."""
     if data is None:
         return
+    data_type_lower = data_type.lower()
 
-    file_type = file_type.lower()
-    if file_type in {"yml", "yaml"}:
+    if data_type_lower == "json":
+        print(json.dumps(data, indent=indent, sort_keys=sort_keys))
+    elif data_type_lower in {"yml", "yaml"}:
         print(yaml.dump(data, sort_keys=False))
     else:
-        print(json.dumps(data, indent=indent, sort_keys=sort_keys))
+        raise ValueError(f"Unsupported data type for printing: {data_type}")
