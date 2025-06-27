@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Any, Optional, Union
 
 
-SUPPORTED_EXTENSIONS = {".json", ".yml", ".yaml"}
+SUPPORTED_EXTENSIONS = {".json", ".yml", ".yaml", ".ipynb"}
 
 
 class FileTypeNotSupportedError(Exception):
