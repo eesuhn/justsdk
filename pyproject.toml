@@ -1,6 +1,6 @@
 [project]
 name = "justsdk"
-version = "2.1.1"
+version = "2.1.2"
 description = "Just a lightweight development kit."
 readme = "README.md"
 authors = [
