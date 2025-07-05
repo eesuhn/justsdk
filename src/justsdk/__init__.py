@@ -4,11 +4,12 @@ __email__ = "eason.yihong@gmail.com"
 
 from .ansi import Fore, Back, Style, Cursor
 from .color_print import (
-    print_color,
-    print_error,
-    print_warning,
-    print_info,
+    ColorPrinter,
     print_success,
+    print_warning,
+    print_error,
+    print_info,
+    print_debug,
 )
 from .file_utils import read_file, write_file, print_data, read_files, write_files
 
@@ -20,11 +21,12 @@ __all__ = [
     "Back",
     "Style",
     "Cursor",
-    "print_color",
-    "print_error",
-    "print_warning",
-    "print_info",
+    "ColorPrinter",
     "print_success",
+    "print_warning",
+    "print_error",
+    "print_info",
+    "print_debug",
     "read_file",
     "write_file",
     "print_data",
