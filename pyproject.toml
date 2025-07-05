@@ -1,7 +1,7 @@
 [project]
 name = "justsdk"
 version = "2.1.0"
-description = "Just DEV."
+description = "Just a lightweight development kit."
 readme = "README.md"
 authors = [
     { name = "eesuhn", email = "eason.yihong@gmail.com" }
