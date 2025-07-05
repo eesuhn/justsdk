@@ -10,7 +10,7 @@ from .color_print import (
     print_info,
     print_success,
 )
-from .file_utils import read_file, write_file, print_data
+from .file_utils import read_file, write_file, print_data, read_files, write_files
 
 __all__ = [
     "__version__",
@@ -28,4 +28,6 @@ __all__ = [
     "read_file",
     "write_file",
     "print_data",
+    "read_files",
+    "write_files",
 ]
