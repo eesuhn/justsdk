@@ -6,6 +6,7 @@ readme = "README.md"
 authors = [
     { name = "eesuhn", email = "eason.yihong@gmail.com" }
 ]
+urls = { "Repository" = "https://github.com/eesuhn/justsdk" }
 requires-python = ">=3.11"
 dependencies = [
     "orjson>=3.10.18",
