@@ -9,8 +9,11 @@ from functools import lru_cache
 
 PathLike = Union[str, Path]
 
-SUPPORTED_EXTENSIONS = frozenset({".json", ".ipynb", ".yml", ".yaml"})
+JSON_EXTENSIONS = frozenset({".json", ".ipynb"})
 YAML_EXTENSIONS = frozenset({".yml", ".yaml"})
+TEXT_EXTENSIONS = frozenset({".md", ".txt"})
+
+SUPPORTED_EXTENSIONS = JSON_EXTENSIONS | YAML_EXTENSIONS | TEXT_EXTENSIONS
 
 ORJSON_OPTIONS_BASE = (
     orjson.OPT_SERIALIZE_NUMPY
@@ -52,7 +55,7 @@ def read_file(
     file_path: PathLike, *, encoding: str = "utf-8", use_orjson: bool = True
 ) -> Any:
     """
-    Read data from a JSON or YAML file.
+    Read data from a file.
 
     Args:
         file_path: Path to the file
@@ -67,6 +70,8 @@ def read_file(
     with open(file_path, mode="r", encoding=encoding) as f:
         if file_path.suffix in YAML_EXTENSIONS:
             return yaml.safe_load(f)
+        elif file_path.suffix in TEXT_EXTENSIONS:
+            return f.read()
         elif use_orjson:
             return orjson.loads(f.read())
         else:
@@ -85,7 +90,7 @@ def write_file(
     atomic: bool = False,
 ) -> Path:
     """
-    Write data to a JSON or YAML file.
+    Write data to a file.
 
     Args:
         data: Data to write
@@ -116,6 +121,8 @@ def write_file(
                 allow_unicode=not ensure_ascii,
                 default_flow_style=False,
             )
+        elif file_path.suffix in TEXT_EXTENSIONS:
+            f.write(str(data))
         elif use_orjson:
             options = _get_orjson_options(indent=(indent > 0), sort_keys=sort_keys)
             f.write(orjson.dumps(data, option=options).decode(encoding))
