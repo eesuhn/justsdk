@@ -57,12 +57,14 @@ class ColorPrinter:
         file: Optional[TextIO] = None,
         use_color: bool = True,
         show_timestamp: bool = False,
+        quiet: bool = False,
     ) -> None:
         self.file = file or sys.stdout
         self.use_color = (
             use_color and hasattr(self.file, "isatty") and self.file.isatty()
         )
         self.show_timestamp = show_timestamp
+        self.quiet = quiet
 
     def print_custom(
         self,
@@ -73,6 +75,9 @@ class ColorPrinter:
         newline_after: bool = False,
         file: Optional[TextIO] = None,
     ) -> None:
+        if self.quiet:
+            return
+
         output_file = file or self.file
 
         parts = []
@@ -98,7 +103,7 @@ class ColorPrinter:
         print("".join(parts), file=output_file)
 
 
-_default_printer = ColorPrinter()
+_default_printer = ColorPrinter(quiet=False)
 
 
 def print_success(
