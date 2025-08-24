@@ -11,7 +11,7 @@ PathLike = Union[str, Path]
 
 JSON_EXTENSIONS = frozenset({".json", ".ipynb"})
 YAML_EXTENSIONS = frozenset({".yml", ".yaml"})
-TEXT_EXTENSIONS = frozenset({".md", ".txt"})
+TEXT_EXTENSIONS = frozenset({".md", ".txt", ".mdx"})
 
 SUPPORTED_EXTENSIONS = JSON_EXTENSIONS | YAML_EXTENSIONS | TEXT_EXTENSIONS
 
