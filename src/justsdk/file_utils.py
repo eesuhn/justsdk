@@ -4,16 +4,12 @@ import orjson
 
 from pathlib import Path
 from typing import Any, Union, Dict
-from functools import lru_cache
 
 
 PathLike = Union[str, Path]
 
 JSON_EXTENSIONS = frozenset({".json", ".ipynb"})
 YAML_EXTENSIONS = frozenset({".yml", ".yaml"})
-TEXT_EXTENSIONS = frozenset({".md", ".txt", ".mdx"})
-
-SUPPORTED_EXTENSIONS = JSON_EXTENSIONS | YAML_EXTENSIONS | TEXT_EXTENSIONS
 
 ORJSON_OPTIONS_BASE = (
     orjson.OPT_SERIALIZE_NUMPY
@@ -29,17 +25,6 @@ class FileTypeNotSupportedError(ValueError):
     def __init__(self, message: str) -> None:
         super().__init__(message)
         self.message = message
-
-
-@lru_cache(maxsize=128)
-def _validate_extension(file_path: Path) -> Path:
-    ext = file_path.suffix.lower()
-    if ext not in SUPPORTED_EXTENSIONS:
-        raise FileTypeNotSupportedError(
-            f"Unsupported file extension: {ext}. "
-            f"Supported: {', '.join(sorted(SUPPORTED_EXTENSIONS))}"
-        )
-    return file_path
 
 
 def _get_orjson_options(indent: bool = True, sort_keys: bool = False) -> int:
@@ -65,17 +50,15 @@ def read_file(
     Returns:
         Parsed data from the file
     """
-    file_path = _validate_extension(Path(file_path))
-
     with open(file_path, mode="r", encoding=encoding) as f:
         if file_path.suffix in YAML_EXTENSIONS:
             return yaml.safe_load(f)
-        elif file_path.suffix in TEXT_EXTENSIONS:
-            return f.read()
-        elif use_orjson:
-            return orjson.loads(f.read())
-        else:
+        elif file_path.suffix in JSON_EXTENSIONS:
+            if use_orjson:
+                return orjson.loads(f.read())
             return json.load(f)
+        else:
+            return f.read()
 
 
 def write_file(
@@ -109,7 +92,6 @@ def write_file(
         raise ValueError("Cannot write None to file")
 
     file_path = Path(file_path)
-    file_path = _validate_extension(file_path)
     file_path.parent.mkdir(parents=True, exist_ok=True)
 
     def write_data(f):
@@ -121,19 +103,20 @@ def write_file(
                 allow_unicode=not ensure_ascii,
                 default_flow_style=False,
             )
-        elif file_path.suffix in TEXT_EXTENSIONS:
-            f.write(str(data))
-        elif use_orjson:
-            options = _get_orjson_options(indent=(indent > 0), sort_keys=sort_keys)
-            f.write(orjson.dumps(data, option=options).decode(encoding))
+        elif file_path.suffix in JSON_EXTENSIONS:
+            if use_orjson:
+                options = _get_orjson_options(indent=(indent > 0), sort_keys=sort_keys)
+                f.write(orjson.dumps(data, option=options).decode(encoding))
+            else:
+                json.dump(
+                    data,
+                    f,
+                    indent=indent if indent > 0 else None,
+                    sort_keys=sort_keys,
+                    ensure_ascii=ensure_ascii,
+                )
         else:
-            json.dump(
-                data,
-                f,
-                indent=indent if indent > 0 else None,
-                sort_keys=sort_keys,
-                ensure_ascii=ensure_ascii,
-            )
+            f.write(str(data))
 
     if atomic:
         import tempfile
