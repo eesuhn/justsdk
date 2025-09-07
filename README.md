@@ -2,7 +2,7 @@
 
 # justsdk
 
-<img src="./docs/cat-pilot.jpeg" alt="cat" width="160" /><br>
+<img src="https://raw.githubusercontent.com/eesuhn/justsdk/refs/heads/main/docs/cat-pilot.jpeg" alt="cat" width="160" /><br>
 
 This is a collection of my commonly used functions that I figured would be nice to have in a library.
 
@@ -24,12 +24,12 @@ import justsdk
 
 ### 1. Colored Print
 
-*_from [`color_print.py`](./src/justsdk/color_print.py)_
+*_from [`color_print.py`](https://github.com/eesuhn/justsdk/tree/main/src/justsdk/color_print.py)_
 
 Print colored messages to the console with optional timestamps.<br>
 Simple as that, expected output: `[MESSAGE_TYPE] YOUR_MESSAGE_HERE`
 
-<img src="./docs/sample_colored_print.png" alt="screenshot" width="200" />
+<img src="https://raw.githubusercontent.com/eesuhn/justsdk/refs/heads/main/docs/sample_colored_print.png" alt="screenshot" width="200" />
 
 #### 1.1. Convenience Functions
 
@@ -71,7 +71,7 @@ Simple as that, expected output: `[MESSAGE_TYPE] YOUR_MESSAGE_HERE`
 
 ### 2. File Utilities
 
-*_from [`file_utils.py`](./src/justsdk/file_utils.py)_
+*_from [`file_utils.py`](https://github.com/eesuhn/justsdk/tree/main/src/justsdk/file_utils.py)_
 
 Handy functions for reading, writing, and pretty-printing files in JSON/YAML formats (and others treated as plain text)
 
