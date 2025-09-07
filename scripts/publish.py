@@ -1,11 +1,7 @@
-#!/usr/bin/env python3
-"""
-Handles version bumping and publishing to PyPI
-"""
-
 import re
 import subprocess
 import sys
+
 from pathlib import Path
 from typing import Literal
 
@@ -63,17 +59,17 @@ def update_version_in_file(file_path: Path, old_version: str, new_version: str) 
     updated_content = re.sub(pattern, replacement, content)
 
     if updated_content == content:
-        print(f"⚠️ Warning: No version found to update in {file_path}")
+        print(f"Warning: No version found to update in {file_path}")
         return
 
     file_path.write_text(updated_content)
-    print(f"✅ Updated {file_path.name}: {old_version} -> {new_version}")
+    print(f"Success: Updated {file_path.name}: {old_version} -> {new_version}")
 
 
 def run_command(
     cmd: list[str], check: bool = True, env: dict = None
 ) -> subprocess.CompletedProcess:
-    print(f"🔧 Running: {' '.join(cmd)}")
+    print(f"Running: {' '.join(cmd)}")
     import os
 
     final_env = os.environ.copy()
@@ -85,7 +81,7 @@ def run_command(
     )
 
     if result.returncode != 0 and check:
-        print(f"❌ Command failed: {' '.join(cmd)}")
+        print(f"Failed: {' '.join(cmd)}")
         print(f"stdout: {result.stdout}")
         print(f"stderr: {result.stderr}")
         sys.exit(1)
@@ -95,16 +91,16 @@ def run_command(
 
 def update_lock_file(dry_run: bool = False) -> None:
     if dry_run:
-        print("🏃 [DRY RUN] Would update uv.lock file")
+        print("[DRY RUN] Would update uv.lock file")
         return
 
-    print("🔒 Updating uv.lock file...")
+    print("Updating uv.lock file...")
     run_command(["uv", "lock", "--upgrade-package", "justsdk"])
 
     if LOCK_FILE.exists():
-        print("✅ Lock file updated successfully")
+        print("Success: Lock file updated successfully")
     else:
-        print("⚠️ Warning: Lock file not found after update")
+        print("Warning: Lock file not found after update")
 
 
 def git_operations(
@@ -114,7 +110,7 @@ def git_operations(
     skip_clean_check: bool = False,
 ) -> None:
     if dry_run:
-        print(f"🏃 [DRY RUN] Would create git tag: v{version}")
+        print(f"[DRY RUN] Would create git tag: v{version}")
         return
 
     run_command(["uv", "run", "ruff", "format"])
@@ -122,9 +118,7 @@ def git_operations(
     if not force and not skip_clean_check:
         result = run_command(["git", "status", "--porcelain"])
         if result.stdout.strip():
-            print("❌ Git repository has uncommitted changes")
-            print("Please commit or stash changes before publishing")
-            print("Or use --force to commit changes automatically")
+            print("Failed: Git repository has uncommitted changes")
             sys.exit(1)
     elif force and not skip_clean_check:
         result = run_command(["git", "status", "--porcelain"])
@@ -140,7 +134,7 @@ def git_operations(
         ]
 
         if other_files:
-            print("📝 Auto-committing pending changes...")
+            print("Auto-committing pending changes...")
             for file in other_files:
                 run_command(["git", "add", file])
             run_command(["git", "commit", "-m", "chore: prepare for version bump"])
@@ -152,19 +146,19 @@ def git_operations(
 
     if LOCK_FILE.exists():
         run_command(["git", "add", str(LOCK_FILE)])
-        print("✅ Staged uv.lock file")
+        print("Success: Staged uv.lock file")
 
     run_command(["git", "commit", "-m", f"bump: version {version}"])
     run_command(["git", "tag", f"v{version}"])
     run_command(["git", "push"])
     run_command(["git", "push", "--tags"])
 
-    print(f"✅ Created git tag: v{version}")
+    print(f"Success: Created git tag v{version}")
 
 
 def build_and_publish(dry_run: bool = False, test_pypi: bool = False) -> None:
     if dry_run:
-        print("🏃 [DRY RUN] Would build and publish package")
+        print("[DRY RUN] Would build and publish package")
         return
 
     dist_dir = ROOT_DIR / "dist"
@@ -177,9 +171,9 @@ def build_and_publish(dry_run: bool = False, test_pypi: bool = False) -> None:
 
     if test_pypi:
         publish_cmd.extend(["--publish-url", "https://test.pypi.org/legacy/"])
-        print("📦 Publishing to TestPyPI...")
+        print("Publishing to TestPyPI...")
     else:
-        print("📦 Publishing to PyPI...")
+        print("Publishing to PyPI...")
 
     import os
 
@@ -190,21 +184,20 @@ def build_and_publish(dry_run: bool = False, test_pypi: bool = False) -> None:
 
     if username and password:
         publish_cmd.extend(["--username", username, "--password", password])
-        print("🔑 Using provided credentials")
+        print("Using provided credentials")
         publish_env = {"TWINE_USERNAME": username, "TWINE_PASSWORD": password}
     else:
-        print("🔓 No credentials provided, attempting trusted publishing")
+        print("No credentials provided, attempting trusted publishing")
 
     run_command(publish_cmd, env=publish_env)
 
     if test_pypi:
-        print("✅ Published to TestPyPI")
+        print("Success: Published to TestPyPI")
         print(
-            "🧪 Test installation: pip install --index-url https://test.pypi.org/simple/ justsdk"
+            "Test installation: pip install --index-url https://test.pypi.org/simple/justsdk"
         )
     else:
-        print("✅ Published to PyPI")
-        print("🎉 Installation: pip install justsdk")
+        print("Success: Published to PyPI")
 
 
 def main():
@@ -238,15 +231,15 @@ def main():
 
     args = parser.parse_args()
 
-    print(f"🚀 Publishing justsdk ({args.bump_type} version bump)")
+    print(f"Publishing justsdk ({args.bump_type} version bump)")
 
     current_version = get_current_version()
     new_version = bump_version(current_version, args.bump_type)
 
-    print(f"📝 Version: {current_version} -> {new_version}")
+    print(f"Version: {current_version} -> {new_version}")
 
     if args.dry_run:
-        print("🏃 [DRY RUN] No changes will be made")
+        print("[DRY RUN] No changes will be made")
 
     if not args.dry_run:
         update_version_in_file(INIT_FILE, current_version, new_version)
@@ -259,7 +252,7 @@ def main():
     build_and_publish(args.dry_run, args.test_pypi)
 
     if not args.dry_run:
-        print(f"🎉 Successfully published justsdk v{new_version}!")
+        print(f"Successfully published justsdk v{new_version}!")
 
 
 if __name__ == "__main__":

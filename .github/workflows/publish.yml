@@ -60,7 +60,7 @@ jobs:
             git add .
             git commit -m "chore: prepare for version bump" || echo "No changes to commit"
           else
-            echo "✅ Working directory is clean"
+            echo "Success: Working directory is clean"
           fi
 
       - name: Bump version and publish (Manual)
