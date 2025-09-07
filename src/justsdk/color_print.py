@@ -30,6 +30,7 @@ def _add_print_methods(cls: type) -> type:
             newline_before: bool = False,
             newline_after: bool = False,
             file: Optional[TextIO] = None,
+            show_timestamp: bool = False,
         ) -> None:
             self.print_custom(
                 message,
@@ -37,6 +38,7 @@ def _add_print_methods(cls: type) -> type:
                 newline_before=newline_before,
                 newline_after=newline_after,
                 file=file,
+                show_timestamp=show_timestamp,
             )
 
         return method
@@ -74,17 +76,19 @@ class ColorPrinter:
         newline_before: bool = False,
         newline_after: bool = False,
         file: Optional[TextIO] = None,
+        show_timestamp: bool = False,
     ) -> None:
         if self.quiet:
             return
 
         output_file = file or self.file
+        use_timestamp = show_timestamp or self.show_timestamp
 
         parts = []
         if newline_before:
             parts.append("\n")
 
-        if self.show_timestamp:
+        if use_timestamp:
             from datetime import datetime
 
             timestamp = datetime.now().strftime("%H:%M:%S")
@@ -112,6 +116,7 @@ def print_success(
     newline_before: bool = False,
     newline_after: bool = False,
     file: Optional[TextIO] = None,
+    show_timestamp: bool = False,
 ) -> None:
     """Print a success message with GREEN color."""
     _default_printer.success(
@@ -119,6 +124,7 @@ def print_success(
         newline_before=newline_before,
         newline_after=newline_after,
         file=file,
+        show_timestamp=show_timestamp,
     )
 
 
@@ -128,6 +134,7 @@ def print_warning(
     newline_before: bool = False,
     newline_after: bool = False,
     file: Optional[TextIO] = None,
+    show_timestamp: bool = False,
 ) -> None:
     """Print a warning message with YELLOW color."""
     _default_printer.warning(
@@ -135,6 +142,7 @@ def print_warning(
         newline_before=newline_before,
         newline_after=newline_after,
         file=file,
+        show_timestamp=show_timestamp,
     )
 
 
@@ -144,6 +152,7 @@ def print_error(
     newline_before: bool = False,
     newline_after: bool = False,
     file: Optional[TextIO] = None,
+    show_timestamp: bool = False,
 ) -> None:
     """Print an error message with RED color."""
     _default_printer.error(
@@ -151,6 +160,7 @@ def print_error(
         newline_before=newline_before,
         newline_after=newline_after,
         file=file,
+        show_timestamp=show_timestamp,
     )
 
 
@@ -160,6 +170,7 @@ def print_info(
     newline_before: bool = False,
     newline_after: bool = False,
     file: Optional[TextIO] = None,
+    show_timestamp: bool = False,
 ) -> None:
     """Print an info message with MAGENTA color."""
     _default_printer.info(
@@ -167,6 +178,7 @@ def print_info(
         newline_before=newline_before,
         newline_after=newline_after,
         file=file,
+        show_timestamp=show_timestamp,
     )
 
 
@@ -176,6 +188,7 @@ def print_debug(
     newline_before: bool = False,
     newline_after: bool = False,
     file: Optional[TextIO] = None,
+    show_timestamp: bool = False,
 ) -> None:
     """Print a debug message with CYAN color."""
     _default_printer.debug(
@@ -183,4 +196,5 @@ def print_debug(
         newline_before=newline_before,
         newline_after=newline_after,
         file=file,
+        show_timestamp=show_timestamp,
     )
