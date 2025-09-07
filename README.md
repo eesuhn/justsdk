@@ -7,14 +7,19 @@
 Just a lightweight development kit.
 
 ## Installation
+
 ```bash
 pip install justsdk
 ```
 
 ## Usage
+
 ```python
 import justsdk
 ```
 
+then check out the [`FUNCTIONS.md`](./FUNCTIONS.md)
+
 ## License
+
 This project is under the MIT License — see the [LICENSE](https://raw.githubusercontent.com/eesuhn/eesuhn-sdk/refs/heads/main/LICENSE) file for details.
